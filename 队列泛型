@@ -1,0 +1,227 @@
+//自定义队列泛型——实现回文数的判断：
+//主要思路：队列存储全部数据，然后让一般数据出队列入栈，再通过出队列和出栈逐一对比
+#include <iostream>
+#include <string.h>
+#define STCAK_INIT_SIZE 10
+#define STACK_SIZE_CONTINUE 5
+#define MaxSize 255
+#define ERROR -1
+using namespace std;
+/*队列泛型的自定义*/
+template <class Q>
+
+class MyQueue {
+	private:
+		Q *base;
+		int front;
+		int rear;
+	public:
+		MyQueue();
+		~MyQueue();
+		bool isFull();
+		bool isEmpty();
+		void EnQueue(Q datain);
+		Q DeQueue();
+		Q getfront();
+};
+//初始化队列
+template <class Q>
+
+MyQueue<Q>::MyQueue() {
+	base = (Q *)malloc(MaxSize * sizeof(Q));
+
+	if (!base) {
+		exit(ERROR);
+	}
+
+	front = rear = 0;
+}
+//销毁队列
+template <class Q>
+
+MyQueue<Q>::~MyQueue() {
+	Q *q;
+
+	while (front != rear) {
+		free(&base[front]);
+		front = (front + 1) % MaxSize;
+	}
+}
+//队列判满
+template <class Q>
+
+bool MyQueue<Q>::isFull() {
+	if (front == (rear + 1) % MaxSize) {
+		return true;
+	} else
+		return false;
+}
+//队列判空
+template <class Q>
+
+bool MyQueue<Q>::isEmpty() {
+	if (front == rear) {
+		return true;
+	} else
+		return false;
+}
+//入队列
+template <class Q>
+
+void MyQueue<Q>::EnQueue(Q datain) {
+	if (front == (rear + 1) % MaxSize)
+		cout << "超出范围" << endl;
+	else {
+		base[rear] = datain;
+		rear = (rear + 1) % MaxSize;
+	}
+}
+//出队列
+template <class Q>
+
+Q MyQueue<Q>::DeQueue() {
+	Q dataout;
+
+	if (front == rear) {
+		return ERROR;
+	} else {
+		dataout = base[front];
+		front = (front + 1) % MaxSize;
+		return dataout;
+	}
+}
+//获取队首元素
+template <class Q>
+
+Q MyQueue<Q>::getfront() {
+	return base[front];
+}
+
+
+
+/*栈泛型的自定义*/
+template <class M>
+
+class MyStack {
+	private:
+		M *top;//栈顶指针
+		M *base;//基地址
+		int stacksize;//栈的大小
+		int length;//栈的长度
+	public:
+		MyStack();//初始化
+		~MyStack();//析构函数
+		void push(M datain);//入栈操作
+		void pop();//出栈操作
+		bool isEmpty();//判断栈是否为空
+		M gettop();//获取栈顶元素
+};
+template <class M>
+
+//栈的初始化
+MyStack<M>::MyStack() {
+	base = (M *)malloc(STCAK_INIT_SIZE * sizeof(M));
+
+	if (!base) {
+		exit(ERROR);
+	}
+
+	top = base;
+	length = 0;
+	stacksize = STCAK_INIT_SIZE;
+}
+//析构函数
+template <class M>
+
+MyStack<M>::~MyStack() {
+	M *p;
+
+	while (top != base) {
+		p = top--;
+		free(top);
+		top = p;
+	}
+
+	free(base);
+}
+//入栈操作
+template <class M>
+
+void MyStack<M>::push(M datain) {
+	if (top - base >= stacksize) {
+		base = (M *)realloc(base, (stacksize + STACK_SIZE_CONTINUE) * sizeof(M));
+
+		if (!base) {
+			exit(ERROR);
+		}
+
+		top = base + stacksize;
+		stacksize += STACK_SIZE_CONTINUE;
+	}
+
+	*top = datain;
+	top++;
+	length++;
+}
+//出栈操作
+template <class M>
+
+void MyStack<M>::pop() {
+	top--;
+	length--;
+}
+//栈是否为空
+template <class M>
+
+bool MyStack<M>::isEmpty() {
+	if (top == base) {
+		return true;
+	} else {
+		return false;
+	}
+}
+//获取栈顶元素
+template <class M>
+
+M MyStack<M>::gettop() {
+	return *(top - 1);
+}
+
+int main() {
+	char chsq[255];
+	cout << "请输入一个长度不大于255的字符序列" << endl;
+	cin >> chsq;
+	cout << chsq << endl;
+	MyStack<char> s;
+	MyQueue<char> q;
+
+	for (int i = 0; i < strlen(chsq); i++) {
+
+		if (strlen(chsq) % 2 == 0 && i < strlen(chsq) / 2)
+			s.push(chsq[i]);//前二分之一入栈
+
+		if (strlen(chsq) % 2 == 0 && i >= strlen(chsq) / 2)
+			q.EnQueue(chsq[i]);//后二分之一入队
+
+		if (strlen(chsq) % 2 != 0 && i < (strlen(chsq) - 1) / 2)
+			s.push(chsq[i]);//设2m+1=strlen(chsq),前m个一入栈
+
+		if (strlen(chsq) % 2 != 0 && i > (strlen(chsq) - 1) / 2)
+			q.EnQueue(chsq[i]);//设2m+1=strlen(chsq),后m个入队
+	}
+
+	for (; !s.isEmpty(); ) {
+
+		if (s.gettop() == q.getfront()) {
+			s.pop();
+			q.DeQueue();
+		} else
+			break;
+	}
+
+	if (s.isEmpty() && q.isEmpty())
+		cout << "是回文串" << endl;
+	else
+		cout << "不是回文串" << endl;
+	return 0;
+}
