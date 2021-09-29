@@ -1,1 +1,117 @@
+//MyStack
+#define STCAK_INIT_SIZE 10
+#define STACK_SIZE_CONTINUE 5
+#define ERROR -1
+#include <iostream>
+using namespace std;
+template <class M>
+
+//栈类创建
+class MyStack {
+	private:
+		M *top;//栈顶指针
+		M *base;//基地址
+		int stacksize;//栈的大小
+		int length;//栈的长度
+	public:
+		MyStack();//初始化
+		~MyStack();//析构函数
+		void push(M datain);//入栈操作
+		void pop();//出栈操作
+		bool isempty();//判断栈是否为空
+		M gettop();//获取栈顶元素
+};
+template <class M>
+
+//栈的初始化
+MyStack<M>::MyStack() {
+	base = (M *)malloc(STCAK_INIT_SIZE * sizeof(M));
+
+	if (!base) {
+		exit(ERROR);
+	}
+
+	top = base;
+	length = 0;
+	stacksize = STCAK_INIT_SIZE;
+}
+//析构函数
+template <class M>
+
+MyStack<M>::~MyStack() {
+	M *p;
+
+	while (top != base) {
+		p = top--;
+		free(top);
+		top = p;
+	}
+
+	free(base);
+}
+//入栈操作
+template <class M>
+
+void MyStack<M>::push(M datain) {
+	if (top - base >= stacksize) {
+		base = (M *)realloc(base, (stacksize + STACK_SIZE_CONTINUE) * sizeof(M));
+
+		if (!base) {
+			exit(ERROR);
+		}
+
+		top = base + stacksize;
+		stacksize += STACK_SIZE_CONTINUE;
+	}
+
+	*top = datain;
+	top++;
+	length++;
+}
+//出栈操作
+template <class M>
+
+void MyStack<M>::pop() {
+	top--;
+	length--;
+}
+//栈是否为空
+template <class M>
+
+bool MyStack<M>::isempty() {
+	if (top == base) {
+		return true;
+	} else {
+		return false;
+	}
+}
+//获取栈顶元素
+template <class M>
+
+M MyStack<M>::gettop() {
+	return *(top - 1);
+}
+
+int main() {
+	int n;
+	MyStack<int> s;
+	cout << "请输入一个十进制整数" << endl;
+	cin >> n;
+
+	while (n) {
+		s.push(n % 2);
+		n = n / 2;
+	}
+
+	cout << "对应的二进制为：" << endl;
+
+	while (!s.isempty()) {
+		cout << s.gettop();
+		s.pop();
+	}
+
+	return 0;
+}
+
+
 
